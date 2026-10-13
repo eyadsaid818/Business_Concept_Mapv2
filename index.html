@@ -325,25 +325,27 @@ renderer.shadowMap.autoUpdate = false;        // refreshed from the loop (every 
 renderer.toneMapping = THREE.NoToneMapping;   // tone mapping happens in the final (bubble) pass
 
 /* adaptive quality: start from a guess about the GPU, then step down while frames run slow.
-   ?q=0..4 pins a level. lite = no CSS backdrop blur, half-rate shadow/paper refresh, smaller shadow map. */
+   ?q=0..4 pins a level. Only the 3D scene is rendered at `scale`; the final pass always runs at full
+   screen resolution and sharpens the upscale, so text and edges stay crisp. Every level keeps MSAA so
+   figures never go jagged. lite = no CSS backdrop blur, half-rate shadow/paper refresh. */
 const QUALITY = [
   { scale: 1,   msaa: 4, lite: false },
-  { scale: .85, msaa: 2, lite: false },
-  { scale: .75, msaa: 2, lite: true },
-  { scale: .65, msaa: 0, lite: true },
-  { scale: .55, msaa: 0, lite: true },
+  { scale: .9,  msaa: 2, lite: false },
+  { scale: .82, msaa: 2, lite: true },
+  { scale: .74, msaa: 2, lite: true },
+  { scale: .66, msaa: 2, lite: true },
 ];
-const DPR = Math.min(devicePixelRatio, 1.5);
+const OUT_DPR = Math.min(devicePixelRatio, 2), SCENE_DPR = Math.min(devicePixelRatio, 1.5);
 const GPU = (() => { try { const gl = renderer.getContext(), x = gl.getExtension('WEBGL_debug_renderer_info'); return x ? gl.getParameter(x.UNMASKED_RENDERER_WEBGL) : ''; } catch { return ''; } })();
 const WEAK_GPU = /intel|swiftshader|llvmpipe|mali|adreno|powervr|basic render/i.test(GPU);
 const Q_PIN = Q.has('q') ? clamp(+Q.get('q') | 0, 0, QUALITY.length - 1) : null;
 const qs = { level: Q_PIN ?? (WEAK_GPU ? 2 : (navigator.hardwareConcurrency || 8) <= 4 ? 1 : 0), best: 0, warm: 2.5, acc: 0, n: 0, slow: 0, fast: 0 };
 let LITE = false;
-renderer.setPixelRatio(Math.max(.5, DPR * QUALITY[qs.level].scale));
+renderer.setPixelRatio(OUT_DPR);
 renderer.setSize(innerWidth, innerHeight, false);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog('#3a2a1f', 34, 105);
+scene.fog = new THREE.Fog('#160f0b', 26, 90);
 const cam = new THREE.PerspectiveCamera(26, innerWidth / innerHeight, 0.1, 240);
 
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -351,7 +353,7 @@ scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture
 
 const bufSize = renderer.getDrawingBufferSize(new THREE.Vector2());
 const HDR = !Q.has('ubyte') && (renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float'));
-const sceneRT = new THREE.WebGLRenderTarget(bufSize.x, bufSize.y, { type: HDR ? THREE.HalfFloatType : THREE.UnsignedByteType, samples: Q.has('nomsaa') ? 0 : QUALITY[qs.level].msaa });
+const sceneRT = new THREE.WebGLRenderTarget(1, 1, { type: HDR ? THREE.HalfFloatType : THREE.UnsignedByteType, samples: Q.has('nomsaa') ? 0 : QUALITY[qs.level].msaa });
 
 /* =====================================================================
    MATERIALS
