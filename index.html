@@ -24,7 +24,7 @@ button{font:inherit;color:inherit}
 .brand{pointer-events:auto;text-shadow:0 0 6px #000,0 1px 12px #000;font-family:Cinzel,serif;letter-spacing:.16em;font-size:12px;color:var(--gold);text-transform:uppercase;line-height:1.5;padding-top:6px;min-width:150px}
 .brand span{display:block;color:var(--muted);letter-spacing:.08em;font-family:'Cormorant Garamond',serif;font-style:italic;text-transform:none;font-size:14px}
 .nav{pointer-events:auto;display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:1180px}
-.chip{font:600 15px/1 'Cormorant Garamond',serif;background:rgba(20,14,10,.55);color:var(--ink);border:1px solid var(--line);
+.chip{font:600 16.5px/1 'Cormorant Garamond',serif;background:rgba(20,14,10,.55);color:var(--ink);border:1px solid var(--line);
   border-radius:999px;padding:7px 11px;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   display:inline-flex;gap:7px;align-items:center;transition:background .25s,border-color .25s,transform .25s}
 .chip:hover{border-color:var(--gold);transform:translateY(-1px)}
@@ -38,8 +38,8 @@ button{font:inherit;color:inherit}
 /* ---------- station labels ---------- */
 #tags{position:fixed;inset:0;pointer-events:none;z-index:2}
 .tag{position:absolute;left:0;top:0;text-align:center;white-space:nowrap;transition:opacity .45s;will-change:transform}
-.tag b{display:block;font-family:Cinzel,serif;font-weight:700;font-size:15px;letter-spacing:.06em;color:#fff7e8;text-shadow:0 0 4px #000,0 1px 12px rgba(0,0,0,.9)}
-.tag span{font-size:15px;font-style:italic;color:#f3e4c8;text-shadow:0 0 4px #000,0 0 10px #000,0 1px 16px rgba(0,0,0,.8)}
+.tag b{display:block;font-family:Cinzel,serif;font-weight:700;font-size:18px;letter-spacing:.06em;color:#fff7e8;text-shadow:0 0 4px #000,0 1px 12px rgba(0,0,0,.9)}
+.tag span{font-size:17px;font-style:italic;color:#f3e4c8;text-shadow:0 0 4px #000,0 0 10px #000,0 1px 16px rgba(0,0,0,.8)}
 .tag em{font-style:normal;font-family:Cinzel,serif;font-size:9.5px;border:1px solid currentColor;border-radius:3px;padding:1px 4px;margin-left:6px;vertical-align:2px}
 .tag.hot b{color:#ffe2a6}
 .badge{position:absolute;left:0;top:0;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;display:grid;place-items:center;
@@ -56,31 +56,31 @@ button{font:inherit;color:inherit}
 .panel.right{right:16px;transform:translateX(24px)}
 .panel.open{opacity:1;transform:none;pointer-events:auto}
 .panel:not(.open){backdrop-filter:none;-webkit-backdrop-filter:none}
-.panel h2{font-family:Cinzel,serif;font-size:17px;letter-spacing:.08em;margin:0 0 4px;color:var(--gold)}
-.panel p.lead{margin:0 0 14px;color:var(--muted);font-style:italic;font-size:16px}
-.panel h3{font:700 18px/1.2 'Cormorant Garamond',serif;margin:16px 0 4px}
-.panel ul{margin:4px 0 0;padding-left:18px;font-size:16.5px;line-height:1.38}
+.panel h2{font-family:Cinzel,serif;font-size:19px;letter-spacing:.08em;margin:0 0 4px;color:var(--gold)}
+.panel p.lead{margin:0 0 14px;color:var(--muted);font-style:italic;font-size:17.5px}
+.panel h3{font:700 20px/1.2 'Cormorant Garamond',serif;margin:16px 0 4px}
+.panel ul{margin:4px 0 0;padding-left:18px;font-size:18px;line-height:1.38}
 .panel li{margin:2px 0}
-.panel .chips{font-size:15.5px;color:var(--muted);margin-top:4px}
+.panel .chips{font-size:17px;color:var(--muted);margin-top:4px}
 .link-item{border-top:1px solid var(--line);padding:11px 0 12px;display:grid;grid-template-columns:28px 1fr;gap:10px;cursor:default}
 .link-item:first-of-type{border-top:0}
 .link-item .n{width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1d140c;font:700 12px/24px Cinzel,serif;text-align:center}
-.link-item .who{font:700 16px/1.2 'Cormorant Garamond',serif}
+.link-item .who{font:700 17.5px/1.2 'Cormorant Garamond',serif}
 .link-item .who button{background:none;border:0;padding:0;cursor:pointer;font:inherit;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px}
-.link-item .t{font:italic 600 16px/1.25 'Cormorant Garamond',serif;color:var(--gold);margin:3px 0}
-.link-item .d{font-size:15.5px;line-height:1.38;color:#e9dcc4}
+.link-item .t{font:italic 600 17.5px/1.25 'Cormorant Garamond',serif;color:var(--gold);margin:3px 0}
+.link-item .d{font-size:17px;line-height:1.38;color:#e9dcc4}
 .link-item.hot{background:linear-gradient(90deg,rgba(214,176,106,.12),transparent)}
 .close{position:sticky;top:0;float:right;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:999px;width:30px;height:30px;cursor:pointer;color:var(--ink)}
 
 /* ---------- hint + tooltip ---------- */
 .hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:10px;align-items:center;z-index:5;
-  font-size:15.5px;color:var(--ink);font-style:italic;pointer-events:none;white-space:nowrap;
+  font-size:17px;color:var(--ink);font-style:italic;pointer-events:none;white-space:nowrap;
   background:rgba(20,14,10,.6);border:1px solid var(--line);border-radius:999px;padding:6px 14px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .hint:empty{display:none}
 .hint .chip{pointer-events:auto;font-style:normal}
 kbd{font:600 11px/1 Cinzel,serif;border:1px solid var(--line);border-radius:4px;padding:2px 5px;color:var(--ink);font-style:normal}
 #tip{position:fixed;left:0;top:0;z-index:8;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;
-  padding:7px 11px;font-size:15px;max-width:280px;opacity:0;transition:opacity .2s}
+  padding:7px 11px;font-size:16.5px;max-width:300px;opacity:0;transition:opacity .2s}
 
 /* ---------- intro ---------- */
 #intro{position:fixed;inset:0;z-index:10;display:grid;place-items:center;text-align:center;cursor:pointer;
@@ -431,7 +431,7 @@ function floorTexture() {
   const c = document.createElement('canvas'); c.width = c.height = 1024; const g = c.getContext('2d');
   const r = mulberry32(7), n = 8, s = 1024 / n;
   for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    g.fillStyle = (x + y) % 2 ? '#4c1d14' : '#a39580'; g.fillRect(x * s, y * s, s, s);
+    g.fillStyle = (x + y) % 2 ? '#3f1811' : '#86796a'; g.fillRect(x * s, y * s, s, s);
     for (let k = 0; k < 3; k++) { // veins
       g.strokeStyle = (x + y) % 2 ? 'rgba(40,10,5,.18)' : 'rgba(120,100,80,.16)'; g.lineWidth = 1 + r() * 1.5;
       g.beginPath(); let px = x * s + r() * s, py = y * s; g.moveTo(px, py);
@@ -444,7 +444,7 @@ function floorTexture() {
   t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t;
 }
 const floor = new THREE.Mesh(new THREE.CircleGeometry(48, 96),
-  new THREE.MeshStandardMaterial({ map: floorTexture(), roughness: .38, envMapIntensity: .45 }));
+  new THREE.MeshStandardMaterial({ map: floorTexture(), roughness: .55, envMapIntensity: .45 }));
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
 (function loggia() {
@@ -474,14 +474,14 @@ floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
   scene.add(g);
 })();
 
-const hemi = new THREE.HemisphereLight('#ffd6a3', '#1c120c', .7); scene.add(hemi);
-const key = new THREE.DirectionalLight('#ffc890', 2.1);
+const hemi = new THREE.HemisphereLight('#ffd6a3', '#1c120c', .5); scene.add(hemi);
+const key = new THREE.DirectionalLight('#ffc890', 1.7);
 key.position.set(-7, 12, 7); key.target.position.set(0, 0, -3);
 key.castShadow = true; key.shadow.mapSize.setScalar(2048);
 Object.assign(key.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 40 });
 key.shadow.bias = -.0004; key.shadow.normalBias = .02;
 scene.add(key, key.target);
-const rim = new THREE.DirectionalLight('#8aa2ff', 1.0); rim.position.set(2, 6, -12); scene.add(rim);
+const rim = new THREE.DirectionalLight('#8aa2ff', .4); rim.position.set(2, 6, -12); scene.add(rim);
 
 const dust = (() => {
   const N = 380, pos = new Float32Array(N * 3), r = mulberry32(3);
@@ -692,7 +692,7 @@ SEATS.forEach((s, i) => {
   fig.hit.userData.station = s.st;
   STN[s.st].seats.push(s);
 });
-const BOARD_W = 6.4, BOARD_H = 3.6, BOARD_BACK = 1.2, BOARD_Y = 2.0;
+const BOARD_W = 6.4, BOARD_H = 3.6, BOARD_BACK = 1.2, BOARD_Y = 2.65;   // bottom edge clears the table from the camera
 for (const s of Object.values(STN)) {
   s.pos = s.seats.reduce((a, b) => a.add(b.pos), new V3()).multiplyScalar(1 / s.seats.length);
   s.f = new V3(-s.pos.x, 0, -s.pos.z).normalize();
@@ -708,23 +708,34 @@ const hitMeshes = SEATS.map(s => s.hit);
    MAP PAINTER — draws a concept map into a canvas, op by op, so a pencil can follow it
    ===================================================================== */
 const DW = 3200, DH = 1800;
-const F = {
-  name: ['700 92px Caveat, cursive', 92], line: ['400 36px Kalam, cursive', 36], sub: ['400 26px Kalam, cursive', 26],
-  head: ['700 56px Caveat, cursive', 56], body: ['400 32px Kalam, cursive', 32], bodyB: ['700 32px Kalam, cursive', 32],
-  small: ['400 28px Kalam, cursive', 28], tiny: ['400 24px Kalam, cursive', 24], via: ['400 26px Kalam, cursive', 26],
-  formula: ['700 104px Caveat, cursive', 104], stamp: ['700 50px Caveat, cursive', 50], chip: ['400 30px Kalam, cursive', 30],
-};
-const INK = '#2f2924', MUTED = '#7a6d60', EDGE = '#5d5248';
-const LH = 44;
+/* map typography. FS scales the reading text; buildMap tries the largest FS that still fits the board,
+   so every map is as legible from the back of a classroom as its length allows. */
+const F = {};
+let FS = 1, LH = 44;
+const fsz = px => Math.round(px * FS);
+function setFontScale(k) {
+  FS = k; LH = fsz(44);
+  const f = (w, px, fam = 'Kalam') => [`${w} ${fsz(px)}px ${fam}, cursive`, fsz(px)];
+  Object.assign(F, {
+    name: ['700 92px Caveat, cursive', 92], line: f(400, 36), sub: f(400, 26),
+    head: f(700, 56, 'Caveat'), body: f(400, 32), bodyB: f(700, 32),
+    small: f(400, 28), tiny: f(400, 24), via: f(400, 26),
+    formula: ['700 104px Caveat, cursive', 104], stamp: ['700 50px Caveat, cursive', 50], chip: f(400, 30),
+  });
+}
+setFontScale(1);
+const INK = '#221c17', MUTED = '#5f5244', EDGE = '#4d4339';
 
 class Painter {
   constructor() {
     this.cv = document.createElement('canvas');
-    this.cv.width = 2048; this.cv.height = 1152; this.S = this.cv.width / DW;   // re-uploaded while drawing, so kept modest
+    this.cv.width = DW; this.cv.height = DH; this.S = this.cv.width / DW;   // full design resolution for crisp text
     this.ctx = this.cv.getContext('2d');
     this.tex = new THREE.CanvasTexture(this.cv);
     this.tex.colorSpace = THREE.SRGBColorSpace;
     this.tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+    this.patch = new THREE.Texture(document.createElement('canvas'));   // staging canvas for partial uploads
+    this.dirty = null;
     this.ops = []; this.i = 0; this.done = true; this.hits = [];
     this.pen = { x: DW * .9, y: DH * .1, lift: 1, color: INK };
     this.grain = this.makeGrain();
@@ -736,7 +747,8 @@ class Painter {
   }
   measure(f, t) { this.ctx.font = f[0]; return this.ctx.measureText(t).width; }
   load(id) {
-    const built = buildMap(id, this);
+    let built;
+    for (const k of [1.34, 1.3, 1.26, 1.22, 1.18, 1.14, 1.1, 1.05, 1]) { setFontScale(k); built = buildMap(id, this); if (built.bottom <= DH - 36) break; }
     this.ops = built.ops; this.hits = built.hits; this.i = 0; this.done = false; this.id = id;
     this.ops.forEach(o => o.t = 0);
   }
@@ -745,7 +757,8 @@ class Painter {
     if (op.type === 'bg') return this.paper(op.color);
     if (op.type === 'fill') {
       c.setTransform(S, 0, 0, S, 0, 0); c.fillStyle = op.fill; c.beginPath();
-      if (op.circle) c.arc(op.x, op.y, op.r, 0, Math.PI * 2); else c.roundRect(op.x, op.y, op.w, op.h, op.r || 14);
+      if (op.circle) { c.arc(op.x, op.y, op.r, 0, Math.PI * 2); this.mark((op.x - op.r) * S, (op.y - op.r) * S, (op.x + op.r) * S, (op.y + op.r) * S); }
+      else { c.roundRect(op.x, op.y, op.w, op.h, op.r || 14); this.mark(op.x * S, op.y * S, (op.x + op.w) * S, (op.y + op.h) * S); }
       c.fill(); return;
     }
     if (op.type === 'path') {
@@ -754,14 +767,19 @@ class Painter {
       while (k < L.length - 2 && L[k + 1] < a) k++;
       const P = (len, j) => { const u = (len - L[j]) / Math.max(L[j + 1] - L[j], 1e-6); return [lerp(pts[j][0], pts[j + 1][0], u), lerp(pts[j][1], pts[j + 1][1], u)]; };
       c.beginPath(); const s = P(a, k); c.moveTo(s[0], s[1]);
-      while (k < L.length - 2 && L[k + 1] < b) { k++; c.lineTo(pts[k][0], pts[k][1]); }
-      const e = P(b, k); c.lineTo(e[0], e[1]); c.stroke(); return;
+      let x0 = s[0], y0 = s[1], x1 = s[0], y1 = s[1];
+      const grow = p => { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); };
+      while (k < L.length - 2 && L[k + 1] < b) { k++; c.lineTo(pts[k][0], pts[k][1]); grow(pts[k]); }
+      const e = P(b, k); c.lineTo(e[0], e[1]); c.stroke(); grow(e);
+      const pad = op.width; this.mark((x0 - pad) * S, (y0 - pad) * S, (x1 + pad) * S, (y1 + pad) * S); return;
     }
     if (op.type === 'text') {
       const xa = Math.round((op.x - 4 + (op.w + 10) * t0) * S), xb = Math.round((op.x - 4 + (op.w + 10) * t1) * S);
       if (xb <= xa) return;
+      const ya = Math.floor((op.y - op.size * 1.15) * S), hh = Math.ceil(op.size * 1.65 * S);
+      this.mark(xa, ya, xb, ya + hh);
       c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.beginPath();
-      c.rect(xa, Math.floor((op.y - op.size * 1.15) * S), xb - xa, Math.ceil(op.size * 1.65 * S)); c.clip();
+      c.rect(xa, ya, xb - xa, hh); c.clip();
       c.setTransform(S, 0, 0, S, 0, 0); c.font = op.font; c.fillStyle = op.color; c.fillText(op.text, op.x, op.y); c.restore();
     }
   }
@@ -786,9 +804,25 @@ class Painter {
     if (this.i >= this.ops.length) this.done = true;
     return drew;
   }
-  finish() { while (this.i < this.ops.length) { const op = this.ops[this.i]; this.drawOp(op, op.t, 1); op.t = 1; this.i++; } this.done = true; }
+  finish() { while (this.i < this.ops.length) { const op = this.ops[this.i]; this.drawOp(op, op.t, 1); op.t = 1; this.i++; } this.done = true; this.dirty = null; }
+  mark(x0, y0, x1, y1) {   // grow the region (canvas px) that changed since the last upload
+    const d = this.dirty;
+    this.dirty = d ? [Math.min(d[0], x0), Math.min(d[1], y0), Math.max(d[2], x1), Math.max(d[3], y1)] : [x0, y0, x1, y1];
+  }
+  /* push only the changed region to the GPU — re-sending the whole 3200×1800 paper every frame is what used to stall */
+  flush() {
+    const d = this.dirty, W = this.cv.width, H = this.cv.height; if (!d) return; this.dirty = null;
+    const x0 = clamp(Math.floor(d[0]) - 2, 0, W), y0 = clamp(Math.floor(d[1]) - 2, 0, H);
+    const w = clamp(Math.ceil(d[2]) + 2, 0, W) - x0, h = clamp(Math.ceil(d[3]) + 2, 0, H) - y0;
+    if (w <= 0 || h <= 0) return;
+    if (w * h > W * H * .3 || !renderer.properties.get(this.tex).__webglInit) { this.tex.needsUpdate = true; return; }
+    const pc = this.patch.image; pc.width = w; pc.height = h;
+    pc.getContext('2d').drawImage(this.cv, x0, y0, w, h, 0, 0, w, h);
+    renderer.copyTextureToTexture(new THREE.Vector2(x0, H - y0 - h), this.patch, this.tex);   // texture rows run bottom-up (flipY)
+  }
   paper(color) {
     const c = this.ctx, S = this.S, w = this.cv.width, h = this.cv.height;
+    this.mark(0, 0, w, h);
     c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = 1;
     c.fillStyle = '#efe3c9'; c.fillRect(0, 0, w, h);
     const r = mulberry32(hashStr(this.id || 'x'));
@@ -847,16 +881,20 @@ function wrapItems(P, f, items, maxW) {
   for (const it of items) { const t = cur ? cur + '  ·  ' + it : it; if (P.measure(f, t) > maxW && cur) { lines.push(cur); cur = it; } else cur = t; }
   if (cur) lines.push(cur); return lines;
 }
+function fitFont(P, f, text, maxW) {   // shrink a font just enough for `text` to fit in maxW
+  const w = P.measure(f, text); if (w <= maxW) return f;
+  const px = Math.floor(f[1] * maxW / w); return [f[0].replace(/\d+px/, px + 'px'), px];
+}
 function viaOps(P, text, x, y) {
   const w = P.measure(F.via, text);
-  return [fillOp(x - 6, y - 22, w + 12, 30, '#efe3c9', 6), textOp(P, text, x, y, F.via, MUTED)];
+  return [fillOp(x - 6, y - fsz(22), w + 12, fsz(30), '#efe3c9', 6), textOp(P, text, x, y, F.via, MUTED)];
 }
 
 function layoutCard(P, card, x, y, w, color, id, rng) {
   const pad = 26, inner = w - pad * 2, ops = [], hits = [], dark = shade(color, -.3);
   const kind = card.kind || 'bul';
   const title = kind === 'links' ? 'Links to other theories' : card.h;
-  let cy = y + pad + 40;
+  let cy = y + pad + fsz(40);
   ops.push(textOp(P, title, x + pad, cy, F.head, dark));
   const hw = Math.min(P.measure(F.head, title) + 18, inner);
   cy += 14; ops.push(pathOp(sketch([[x + pad - 4, cy], [x + pad + hw, cy + 2]], rng, 1.2), color, 3)); cy += 6;
@@ -875,10 +913,10 @@ function layoutCard(P, card, x, y, w, color, id, rng) {
       ['Safety', 'job security · stability · steady job'], ['Physiological', 'pay · survival · basic necessities']];
     const fr = [.6, .7, .8, .9, 1]; cy += 16;
     lv.forEach(([a, b], k) => {
-      const lw = inner * fr[k], lx = x + pad + (inner - lw) / 2, ly = cy, lh = 76;
+      const lw = inner * fr[k], lx = x + pad + (inner - lw) / 2, ly = cy, lh = fsz(76);
       ops.push(fillOp(lx, ly, lw, lh - 6, rgba(color, .07 + (4 - k) * .035), 6), pathOp(sketch(rectPoly(lx, ly, lw, lh - 6, rng, 6), rng, 1.1), color, 2.6));
-      const wa = P.measure(F.bodyB, a), wb = P.measure(F.tiny, b);
-      ops.push(textOp(P, a, lx + (lw - wa) / 2, ly + 32, F.bodyB, dark), textOp(P, b, lx + (lw - wb) / 2, ly + 60, F.tiny, MUTED));
+      const fa = fitFont(P, F.bodyB, a, lw - 16), fb = fitFont(P, F.tiny, b, lw - 16), wa = P.measure(fa, a), wb = P.measure(fb, b);
+      ops.push(textOp(P, a, lx + (lw - wa) / 2, ly + fsz(32), fa, dark), textOp(P, b, lx + (lw - wb) / 2, ly + fsz(60), fb, MUTED));
       cy += lh;
     });
     cy -= 6;
@@ -891,12 +929,12 @@ function layoutCard(P, card, x, y, w, color, id, rng) {
     const rows = LINKS.filter(l => l.a === id || l.b === id);
     rows.forEach(l => {
       const other = l.a === id ? l.b : l.a, oc = ST[other].color, top = cy + 6;
-      cy += 44;
+      cy += fsz(44);
       ops.push(pathOp(sketch(circlePoly(x + pad + 17, cy - 11, 17, rng), rng, .6, 8), '#a07a35', 2.4));
       const nw = P.measure(F.small, String(l.n));
       ops.push(textOp(P, String(l.n), x + pad + 17 - nw / 2, cy - 2, F.small, '#7d5a20'));
       ops.push(textOp(P, '↔ ' + ST[other].short, x + pad + 48, cy, F.bodyB, shade(oc, -.15)));
-      wrap(P, F.small, l.t, inner - 52).forEach(ln => { cy += 37; ops.push(textOp(P, ln, x + pad + 48, cy, F.small, INK)); });
+      wrap(P, F.small, l.t, inner - 52).forEach(ln => { cy += fsz(37); ops.push(textOp(P, ln, x + pad + 48, cy, F.small, INK)); });
       cy += 8;
       hits.push({ kind: 'link', rect: [x + 8, top, w - 16, cy - top + 4], target: other, color: oc, n: l.n });
     });
@@ -905,7 +943,7 @@ function layoutCard(P, card, x, y, w, color, id, rng) {
     if (card.b) bullets(card.b);
     if (card.c) {
       cy += 4;
-      wrapItems(P, F.chip, card.c, inner).forEach(ln => { cy += 41; ops.push(textOp(P, ln, x + pad, cy, F.chip, dark)); });
+      wrapItems(P, F.chip, card.c, inner).forEach(ln => { cy += fsz(41); ops.push(textOp(P, ln, x + pad, cy, F.chip, dark)); });
       cy += 6;
     }
   }
@@ -923,8 +961,8 @@ function buildMap(id, P) {
   const cOps = [];
   let by = cyy + 98;
   const nw = P.measure(F.name, m.name); cOps.push(textOp(P, m.name, cx + (cw - nw) / 2, by, F.name, dark));
-  by += 52; const lw = P.measure(F.line, m.line); cOps.push(textOp(P, m.line, cx + (cw - lw) / 2, by, F.line, INK));
-  wrap(P, F.sub, m.sub, cw - 2 * pad - 260).forEach(ln => { by += 36; const w = P.measure(F.sub, ln); cOps.push(textOp(P, ln, cx + (cw - w) / 2, by, F.sub, MUTED)); });
+  by += fsz(50); const lw = P.measure(F.line, m.line); cOps.push(textOp(P, m.line, cx + (cw - lw) / 2, by, F.line, INK));
+  wrap(P, F.sub, m.sub, cw - 2 * pad - 260).forEach(ln => { by += fsz(36); const w = P.measure(F.sub, ln); cOps.push(textOp(P, ln, cx + (cw - w) / 2, by, F.sub, MUTED)); });
   const ch = by - cyy + 30;
   first.push(fillOp(cx, cyy, cw, ch, rgba(st.color, .1), 20),
     pathOp(sketch(rectPoly(cx, cyy, cw, ch, rng), rng, 1.8), st.color, 3.6),
@@ -936,9 +974,9 @@ function buildMap(id, P) {
   const cart = { x: cx, y: cyy, w: cw, h: ch };
 
   /* columns */
-  const COLX = [70, 835, 1600, 2365], CW = 700, heads = [], rest = [];
+  const COLX = [75, 850, 1625, 2400], CW = 725, heads = [], rest = [];
   m.cols.forEach((items, ci) => {
-    const x = COLX[ci], cxm = x + CW / 2; let y = cart.y + cart.h + 120, prev = null;
+    const x = COLX[ci], cxm = x + CW / 2; let y = cart.y + cart.h + 104, prev = null;
     items.forEach((card, k) => {
       const color = card.col || st.color, L = layoutCard(P, card, x, y, CW, color, id, rng), ops = [];
       if (k === 0) {
@@ -959,7 +997,7 @@ function buildMap(id, P) {
       ops.push(...L.ops); hits.push(...L.hits);
       (k === 0 ? heads : rest).push(ops);
       prev = { y, h: L.h };
-      y += L.h + (items[k + 1]?.root ? 74 : 104);
+      y += L.h + (items[k + 1]?.root ? 64 : 88);
     });
   });
   let ops = first.concat(...heads, ...rest);
@@ -974,7 +1012,7 @@ function buildMap(id, P) {
   }
   const total = out.reduce((a, o) => a + (o.dur || 0), 0), k = total > 8 ? 8 / total : 1;
   out.forEach(o => o.dur *= k);
-  return { ops: out, hits };
+  return { ops: out, hits, bottom: Math.max(...hits.map(h => h.rect[1] + h.rect[3])) };
 }
 
 /* =====================================================================
@@ -985,6 +1023,9 @@ const board = new THREE.Group(); board.visible = false; scene.add(board);
 const roll = new THREE.Group(); roll.position.y = BOARD_H / 2; board.add(roll);
 const paperGeo = new THREE.PlaneGeometry(BOARD_W, BOARD_H); paperGeo.translate(0, -BOARD_H / 2, 0);
 const paper = new THREE.Mesh(paperGeo, new THREE.MeshBasicMaterial({ map: painter.tex, fog: false }));
+paper.material.onBeforeCompile = sh => {   // lean toward the sharper mip level so handwriting stays crisp when scaled down
+  sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', 'diffuseColor *= texture2D( map, vMapUv, -.7 );');
+};
 roll.add(paper);
 function rod() {
   const g = new THREE.Group(), wood = M.wood(), gold = M.gold();
@@ -1050,7 +1091,7 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
     uShine: { value: BUB.shine }, uRim: { value: BUB.rim }, uIridescence: { value: BUB.iridescence }, uIntensity: { value: BUB.intensity },
     uTint: { value: new THREE.Vector3(...BUB.tint) }, uTintStrength: { value: BUB.tintStrength },
     uColorA: { value: new THREE.Vector3(...BUB.colorA) }, uColorB: { value: new THREE.Vector3(...BUB.colorB) },
-    uVignette: { value: .6 }, uGrain: { value: .03 }, uExposure: { value: 1.2 }, uFade: { value: 0 },
+    uVignette: { value: .6 }, uGrain: { value: .03 }, uExposure: { value: 1.2 }, uFade: { value: 0 }, uTexel: { value: new THREE.Vector2(1, 1) }, uSharpen: { value: .3 },
   },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }`,
   fragmentShader: `
@@ -1059,7 +1100,7 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
     uniform sampler2D uScene; uniform vec2 uResolution; uniform float uDpr, uTime, uPresence;
     uniform int uCount; uniform vec3 uTrail[${MAXT}]; uniform vec4 uBox; uniform float uSoft, uRefraction, uDispersion, uFrost;
     uniform float uShine, uRim, uIridescence, uIntensity, uTintStrength; uniform vec3 uTint, uColorA, uColorB;
-    uniform float uVignette, uGrain, uExposure, uFade;
+    uniform float uVignette, uGrain, uExposure, uFade, uSharpen; uniform vec2 uTexel;
 
     vec3 sceneAt(vec2 px, float blur){
       vec2 uv = clamp(px / uResolution, vec2(.0005), vec2(.9995));
@@ -1070,6 +1111,15 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
                     + texture2D(uScene, uv + vec2(-o.x, -o.y*.35)).rgb + texture2D(uScene, uv + vec2(o.x*.35, -o.y)).rgb);
       }
       return c;
+    }
+    /* clamped unsharp mask on the upscaled scene: crisper text and silhouettes, no halos */
+    vec3 sharpAt(vec2 px){
+      vec2 uv = clamp(px / uResolution, vec2(.0005), vec2(.9995));
+      vec3 c = texture2D(uScene, uv).rgb;
+      vec3 n = texture2D(uScene, uv + vec2(0., uTexel.y)).rgb, s = texture2D(uScene, uv - vec2(0., uTexel.y)).rgb;
+      vec3 e = texture2D(uScene, uv + vec2(uTexel.x, 0.)).rgb, w = texture2D(uScene, uv - vec2(uTexel.x, 0.)).rgb;
+      vec3 lo = min(c, min(min(n, s), min(e, w))), hi = max(c, max(max(n, s), max(e, w)));
+      return clamp(c + (c - (n + s + e + w)*.25)*uSharpen*2., lo, hi);
     }
     vec3 neutral(vec3 color){
       const float sc = .8 - .04; const float ds = .15;
@@ -1117,7 +1167,7 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
     }
     void main(){
       vec2 frag = gl_FragCoord.xy;
-      vec3 outc = display(sceneAt(frag, 0.));
+      vec3 outc = display(sharpAt(frag));
       float minRes = min(uResolution.x, uResolution.y);
       vec2 p = (frag*2. - uResolution)/minRes;
       if (uPresence > .004 && all(greaterThan(p, uBox.xy)) && all(lessThan(p, uBox.zw))) {
@@ -1176,7 +1226,7 @@ function bubbleFrame(delta) {
   }
   trailX[0] = bub.headX; trailY[0] = bub.headY;
   bub.presence += (bub.target - bub.presence) * kScale;
-  const u = post.material.uniforms, T3 = u.uTrail.value, W = sceneRT.width, H = sceneRT.height, dpr = W / Math.max(canvas.clientWidth, 1);
+  const u = post.material.uniforms, T3 = u.uTrail.value, W = bufSize.x, H = bufSize.y, dpr = W / Math.max(canvas.clientWidth, 1);
   const count = clamp(Math.round(BUB.trail), 1, MAXT), minRes = Math.min(W, H), toN = 2 / minRes;
   const r0 = Math.max(BUB.size, 4) * dpr * bub.presence * toN;   // head radius, normalised units
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
@@ -1391,19 +1441,24 @@ function pick() {
 /* =====================================================================
    RESIZE + LOOP
    ===================================================================== */
+/* the 3D scene renders at the quality level's scale (a notch higher while a map is open, since that view is
+   cheap and all about legible text); the final pass is always full resolution */
+const sceneScale = () => Math.min(1, QUALITY[qs.level].scale + (mode === 'focus' ? .18 : 0));
+let appliedScale = 0;
 function resize() {
   const q = QUALITY[qs.level];
-  renderer.setPixelRatio(Math.max(.5, DPR * q.scale));
+  renderer.setPixelRatio(OUT_DPR);
   renderer.setSize(innerWidth, innerHeight, false);
   renderer.getDrawingBufferSize(bufSize);
   const msaa = Q.has('nomsaa') ? 0 : q.msaa;
   if (sceneRT.samples !== msaa) { sceneRT.samples = msaa; sceneRT.dispose(); }
-  sceneRT.setSize(bufSize.x, bufSize.y);
+  appliedScale = sceneScale();
+  const k = SCENE_DPR / OUT_DPR * appliedScale;
+  sceneRT.setSize(Math.max(1, Math.round(bufSize.x * k)), Math.max(1, Math.round(bufSize.y * k)));
+  post.material.uniforms.uTexel.value.set(1 / sceneRT.width, 1 / sceneRT.height);
+  post.material.uniforms.uSharpen.value = Math.min(.8, .3 + Math.max(0, 1 - sceneRT.width / bufSize.x) * 1.2);
   cam.aspect = aspect(); cam.updateProjectionMatrix();
-  if (LITE !== q.lite) {
-    LITE = q.lite; document.documentElement.classList.toggle('lite', LITE);
-    key.shadow.mapSize.setScalar(LITE ? 1024 : 2048); key.shadow.map?.dispose(); key.shadow.map = null;
-  }
+  if (LITE !== q.lite) { LITE = q.lite; document.documentElement.classList.toggle('lite', LITE); }
 }
 addEventListener('resize', resize);
 
@@ -1426,9 +1481,10 @@ resize();
 
 const css = (el, prop, v) => { const c = el._css ??= {}; if (c[prop] !== v) { c[prop] = v; el.style[prop] = v; } };   // skip no-op style writes
 const tmp = new V3(), tmpV = new V3(), plane = new THREE.Plane(UP, -1.5), hitP = new V3(), penCol = new THREE.Color();
-let last = performance.now(), T = 0, frameNo = 0, paperDirty = false;
+let last = performance.now(), T = 0, frameNo = 0;
 function frame(now, sim) {
   if (!sim) adaptQuality(now - last);
+  if (sceneScale() !== appliedScale) resize();   // entering / leaving a map
   const dt = sim ? .1 : Math.min((now - last) / 1000, 1 / 20); last = now; T += dt; frameNo++;
   updateCamera(dt);
   if (pointerDirty || (T * 10 | 0) % 3 === 0) pick();
@@ -1484,9 +1540,8 @@ function frame(now, sim) {
     if (bs.unroll === bs.target) { bs.rollSpeed = 1.25; if (bs.onRolled) { const f = bs.onRolled; bs.onRolled = null; f(); } }
   }
   if (board.visible) {
-    if (mode === 'focus' && !painter.done && bs.unroll >= 1) { if (painter.step(dt)) paperDirty = true; if (painter.done) syncUI(); }
-    /* re-uploading the paper is the costly part of sketching; the lite tier does it at half rate */
-    if (paperDirty && (painter.done || !LITE || frameNo % 2 === 0)) { painter.tex.needsUpdate = true; paperDirty = false; }
+    if (mode === 'focus' && !painter.done && bs.unroll >= 1) { painter.step(dt); if (painter.done) syncUI(); }
+    painter.flush();
     const pen = painter.pen;
     const restX = DW * .955, restY = DH * .06;
     const tx = painter.done ? restX : pen.x, ty = painter.done ? restY : pen.y, tl = painter.done ? .9 + Math.sin(T * 1.4) * .15 : pen.lift;
@@ -1537,6 +1592,7 @@ function frame(now, sim) {
   const pu = post.material.uniforms;
   pu.uVignette.value = lerp(pu.uVignette.value, mode === 'focus' ? .3 : .6, 1 - Math.exp(-dt * 3));
   pu.uFade.value = lerp(pu.uFade.value, 0, 1 - Math.exp(-dt * 2));
+  pu.uExposure.value = lerp(pu.uExposure.value, mode === 'focus' ? 1.2 : .92, 1 - Math.exp(-dt * 2));   // dim hall, bright board
 
   bubbleFrame(Math.min(dt, 1 / 30));
   if (sim) return;
@@ -1563,6 +1619,8 @@ intro.addEventListener('click', dismissIntro);
   const fonts = ['700 92px Caveat', '400 28px Kalam', '700 28px Kalam', '700 15px Cinzel'];
   await Promise.race([Promise.all(fonts.map(f => document.fonts.load(f))), new Promise(r => setTimeout(r, 3000))]);
   SEATS.forEach(s => { if (s.look.prop === 'tablet') s.g.traverse(o => { if (Array.isArray(o.material)) o.material[4].map = tabletTexture(); }); });
+  { const seen = new Set(); scene.traverse(o => [].concat(o.material || []).forEach(m => {   // dimmer room reflections for the evening look
+      if (!seen.has(m) && 'envMapIntensity' in m) { seen.add(m); m.envMapIntensity *= .5; } })); }
   const p0 = introPose(); cur.pos.copy(p0.pos); cur.tgt.copy(p0.tgt);
   document.getElementById('load').textContent = 'Click anywhere to begin';
   requestAnimationFrame(t => { last = t; frame(t); });
