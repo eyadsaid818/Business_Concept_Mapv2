@@ -410,18 +410,18 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(110, 48, 24), new THREE.Shad
     float fbm(vec3 p){ float a=.5, s=0.; for(int i=0;i<4;i++){ s+=a*n3(p); p*=2.03; a*=.5; } return s; }
     void main(){
       vec3 d = normalize(vDir); float h = d.y;
-      vec3 zen = vec3(.035,.06,.15), mid = vec3(.18,.26,.42), hor = vec3(.95,.62,.32);
+      vec3 zen = vec3(.008,.012,.04), mid = vec3(.05,.065,.14), hor = vec3(.5,.26,.12);   // late dusk
       vec3 col = mix(hor, mid, smoothstep(-.02,.28,h));
       col = mix(col, zen, smoothstep(.28,.95,h));
       vec3 sun = normalize(vec3(-.35 + uMouse.x*.55, .14 + uMouse.y*.08, -1.));
       float s = max(dot(d, sun), 0.);
-      col += vec3(1.,.7,.4)*pow(s,40.)*1.4 + vec3(1.,.55,.3)*pow(s,5.)*.35;
+      col += vec3(1.,.62,.32)*pow(s,40.)*.9 + vec3(1.,.5,.25)*pow(s,5.)*.2;
       vec2 uv = d.xz/(max(h,.04)+.22) + vec2(uTime*.012 + uMouse.x*.06, uMouse.y*.04);
       float c = fbm(vec3(uv*1.25, uTime*.025));
       float cl = smoothstep(.48,.78,c) * smoothstep(.0,.16,h);
-      vec3 cc = mix(vec3(1.,.82,.62), vec3(.55,.5,.6), smoothstep(.05,.7,h)) * (.75 + .5*pow(s,3.));
+      vec3 cc = mix(vec3(.6,.38,.25), vec3(.16,.15,.22), smoothstep(.05,.7,h)) * (.7 + .5*pow(s,3.));
       col = mix(col, cc, cl*.8);
-      col = mix(col, vec3(.09,.06,.045), smoothstep(.0,-.12,h));
+      col = mix(col, vec3(.035,.025,.02), smoothstep(.0,-.12,h));
       gl_FragColor = vec4(col, 1.);
     }`
 }));
@@ -431,7 +431,7 @@ function floorTexture() {
   const c = document.createElement('canvas'); c.width = c.height = 1024; const g = c.getContext('2d');
   const r = mulberry32(7), n = 8, s = 1024 / n;
   for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    g.fillStyle = (x + y) % 2 ? '#7d3424' : '#e6dac4'; g.fillRect(x * s, y * s, s, s);
+    g.fillStyle = (x + y) % 2 ? '#4c1d14' : '#a39580'; g.fillRect(x * s, y * s, s, s);
     for (let k = 0; k < 3; k++) { // veins
       g.strokeStyle = (x + y) % 2 ? 'rgba(40,10,5,.18)' : 'rgba(120,100,80,.16)'; g.lineWidth = 1 + r() * 1.5;
       g.beginPath(); let px = x * s + r() * s, py = y * s; g.moveTo(px, py);
@@ -474,14 +474,14 @@ floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
   scene.add(g);
 })();
 
-const hemi = new THREE.HemisphereLight('#ffe7c4', '#3b281b', 1.7); scene.add(hemi);
-const key = new THREE.DirectionalLight('#ffdcae', 3.2);
+const hemi = new THREE.HemisphereLight('#ffd6a3', '#1c120c', .7); scene.add(hemi);
+const key = new THREE.DirectionalLight('#ffc890', 2.1);
 key.position.set(-7, 12, 7); key.target.position.set(0, 0, -3);
-key.castShadow = true; key.shadow.mapSize.setScalar(QUALITY[qs.level].lite ? 1024 : 2048);
+key.castShadow = true; key.shadow.mapSize.setScalar(2048);
 Object.assign(key.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 40 });
 key.shadow.bias = -.0004; key.shadow.normalBias = .02;
 scene.add(key, key.target);
-const rim = new THREE.DirectionalLight('#9fb7ff', 1.1); rim.position.set(2, 6, -12); scene.add(rim);
+const rim = new THREE.DirectionalLight('#8aa2ff', 1.0); rim.position.set(2, 6, -12); scene.add(rim);
 
 const dust = (() => {
   const N = 380, pos = new Float32Array(N * 3), r = mulberry32(3);
@@ -545,10 +545,10 @@ function candle(slot) {
     x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); })();
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffb36a', blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: .8 }));
   glow.scale.set(.42, .42, 1); glow.position.y = .5;
-  const light = new THREE.PointLight('#ffae5e', 3.2, 5.5, 1.6); light.position.y = .56;
+  const light = new THREE.PointLight('#ffa456', 4.6, 7, 1.5); light.position.y = .56;
   [base, stem, cup, wax].forEach(m => m.castShadow = true);
   g.add(base, stem, cup, wax, flame, glow, light); tableG.add(g);
-  decor.push({ g, light, flame, glow, base: 3.2, seed: Math.random() * 10 });
+  decor.push({ g, light, flame, glow, base: 4.6, seed: Math.random() * 10 });
 }
 function books(slot, rot) {
   const { p, phi } = seatPos(slot, R - .72), g = new THREE.Group(); g.position.copy(p).setY(TABLE_Y); g.rotation.y = phi + rot;
@@ -1050,7 +1050,7 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
     uShine: { value: BUB.shine }, uRim: { value: BUB.rim }, uIridescence: { value: BUB.iridescence }, uIntensity: { value: BUB.intensity },
     uTint: { value: new THREE.Vector3(...BUB.tint) }, uTintStrength: { value: BUB.tintStrength },
     uColorA: { value: new THREE.Vector3(...BUB.colorA) }, uColorB: { value: new THREE.Vector3(...BUB.colorB) },
-    uVignette: { value: .45 }, uGrain: { value: .03 }, uExposure: { value: 1.2 }, uFade: { value: 0 },
+    uVignette: { value: .6 }, uGrain: { value: .03 }, uExposure: { value: 1.2 }, uFade: { value: 0 },
   },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }`,
   fragmentShader: `
@@ -1535,7 +1535,7 @@ function frame(now, sim) {
   sky.material.uniforms.uTime.value = T; sky.material.uniforms.uMouse.value.copy(mouseS);
   key.position.set(-7 + mouseS.x * 2.5, 12, 7 - mouseS.y * 1.5);
   const pu = post.material.uniforms;
-  pu.uVignette.value = lerp(pu.uVignette.value, mode === 'focus' ? .2 : .45, 1 - Math.exp(-dt * 3));
+  pu.uVignette.value = lerp(pu.uVignette.value, mode === 'focus' ? .3 : .6, 1 - Math.exp(-dt * 3));
   pu.uFade.value = lerp(pu.uFade.value, 0, 1 - Math.exp(-dt * 2));
 
   bubbleFrame(Math.min(dt, 1 / 30));
