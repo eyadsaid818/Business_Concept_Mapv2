@@ -55,6 +55,7 @@ button{font:inherit;color:inherit}
 .panel.left{left:16px;transform:translateX(-24px)}
 .panel.right{right:16px;transform:translateX(24px)}
 .panel.open{opacity:1;transform:none;pointer-events:auto}
+.panel:not(.open){backdrop-filter:none;-webkit-backdrop-filter:none}
 .panel h2{font-family:Cinzel,serif;font-size:17px;letter-spacing:.08em;margin:0 0 4px;color:var(--gold)}
 .panel p.lead{margin:0 0 14px;color:var(--muted);font-style:italic;font-size:16px}
 .panel h3{font:700 18px/1.2 'Cormorant Garamond',serif;margin:16px 0 4px}
@@ -79,12 +80,12 @@ button{font:inherit;color:inherit}
 .hint .chip{pointer-events:auto;font-style:normal}
 kbd{font:600 11px/1 Cinzel,serif;border:1px solid var(--line);border-radius:4px;padding:2px 5px;color:var(--ink);font-style:normal}
 #tip{position:fixed;left:0;top:0;z-index:8;pointer-events:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;
-  padding:7px 11px;font-size:15px;max-width:280px;opacity:0;transition:opacity .2s;backdrop-filter:blur(8px)}
+  padding:7px 11px;font-size:15px;max-width:280px;opacity:0;transition:opacity .2s}
 
 /* ---------- intro ---------- */
 #intro{position:fixed;inset:0;z-index:10;display:grid;place-items:center;text-align:center;cursor:pointer;
   background:radial-gradient(ellipse at 50% 45%,rgba(30,21,14,.55),rgba(14,10,7,.96) 70%);transition:opacity 1.1s ease}
-#intro.gone{opacity:0;pointer-events:none}
+#intro.gone{opacity:0;pointer-events:none;visibility:hidden;transition:opacity 1.1s ease,visibility 0s 1.1s}
 #intro .k{font-family:Cinzel,serif;letter-spacing:.32em;font-size:12px;color:var(--gold);text-transform:uppercase}
 #intro h1{font:500 clamp(40px,7vw,92px)/1 Cinzel,serif;margin:16px 0 10px;letter-spacing:.04em;
   background:linear-gradient(180deg,#fff3da,#d9b46e 60%,#9c7334);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -92,6 +93,12 @@ kbd{font:600 11px/1 Cinzel,serif;border:1px solid var(--line);border-radius:4px;
 #intro .go{margin-top:28px;display:inline-block;font:600 13px Cinzel,serif;letter-spacing:.2em;border:1px solid var(--gold);color:var(--gold);
   padding:12px 22px;border-radius:999px}
 #intro .load{margin-top:14px;font-size:14px;color:#8d7c63}
+/* lite tier (set by the adaptive quality loop): no live blur over the constantly-redrawn canvas */
+.lite .chip,.lite .hint,.lite .panel{backdrop-filter:none;-webkit-backdrop-filter:none}
+.lite .chip{background:rgba(20,14,10,.8)}
+.lite .chip.on{background:rgba(66,51,31,.92)}
+.lite .hint{background:rgba(20,14,10,.82)}
+.lite .panel{background:rgba(24,17,12,.95)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 @media (max-width:760px){
@@ -158,6 +165,7 @@ kbd{font:600 11px/1 Cinzel,serif;border:1px solid var(--line);border-radius:4px;
 <script type="module">
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 /* =====================================================================
    CONTENT — everything below is taken only from the two attached PDFs
@@ -311,11 +319,28 @@ function rgba(hex, a) { const c = new THREE.Color(hex); return `rgba(${c.r * 255
 
 const canvas = document.getElementById('gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight, false);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = false;        // refreshed from the loop (every other frame on the lite tier)
 renderer.toneMapping = THREE.NoToneMapping;   // tone mapping happens in the final (bubble) pass
+
+/* adaptive quality: start from a guess about the GPU, then step down while frames run slow.
+   ?q=0..4 pins a level. lite = no CSS backdrop blur, half-rate shadow/paper refresh, smaller shadow map. */
+const QUALITY = [
+  { scale: 1,   msaa: 4, lite: false },
+  { scale: .85, msaa: 2, lite: false },
+  { scale: .75, msaa: 2, lite: true },
+  { scale: .65, msaa: 0, lite: true },
+  { scale: .55, msaa: 0, lite: true },
+];
+const DPR = Math.min(devicePixelRatio, 1.5);
+const GPU = (() => { try { const gl = renderer.getContext(), x = gl.getExtension('WEBGL_debug_renderer_info'); return x ? gl.getParameter(x.UNMASKED_RENDERER_WEBGL) : ''; } catch { return ''; } })();
+const WEAK_GPU = /intel|swiftshader|llvmpipe|mali|adreno|powervr|basic render/i.test(GPU);
+const Q_PIN = Q.has('q') ? clamp(+Q.get('q') | 0, 0, QUALITY.length - 1) : null;
+const qs = { level: Q_PIN ?? (WEAK_GPU ? 2 : (navigator.hardwareConcurrency || 8) <= 4 ? 1 : 0), best: 0, warm: 2.5, acc: 0, n: 0, slow: 0, fast: 0 };
+let LITE = false;
+renderer.setPixelRatio(Math.max(.5, DPR * QUALITY[qs.level].scale));
+renderer.setSize(innerWidth, innerHeight, false);
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog('#3a2a1f', 34, 105);
@@ -326,7 +351,7 @@ scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture
 
 const bufSize = renderer.getDrawingBufferSize(new THREE.Vector2());
 const HDR = !Q.has('ubyte') && (renderer.extensions.has('EXT_color_buffer_float') || renderer.extensions.has('EXT_color_buffer_half_float'));
-const sceneRT = new THREE.WebGLRenderTarget(bufSize.x, bufSize.y, { type: HDR ? THREE.HalfFloatType : THREE.UnsignedByteType, samples: Q.has('nomsaa') ? 0 : 4 });
+const sceneRT = new THREE.WebGLRenderTarget(bufSize.x, bufSize.y, { type: HDR ? THREE.HalfFloatType : THREE.UnsignedByteType, samples: Q.has('nomsaa') ? 0 : QUALITY[qs.level].msaa });
 
 /* =====================================================================
    MATERIALS
@@ -342,6 +367,31 @@ const M = {
             sheenColor: new THREE.Color(hex).lerp(new THREE.Color('#ffffff'), .45), envMapIntensity: .35 }),
 };
 
+/* fold the static meshes under `root` into one mesh per material — same look, a fraction of the draw calls.
+   `keep(obj)` excludes an object (and its subtree) that animates on its own or is used for picking. */
+function mergeStatic(root, keep = () => false) {
+  root.updateMatrixWorld(true);
+  const inv = root.matrixWorld.clone().invert(), groups = new Map();
+  (function walk(o) {
+    for (const c of o.children) {
+      if (keep(c) || c.userData.spin) continue;
+      if (c.isMesh && !c.children.length && !Array.isArray(c.material) && c.material.visible !== false) {
+        const k = [c.material.uuid, !!c.geometry.index, Object.keys(c.geometry.attributes).sort(), c.castShadow, c.receiveShadow].join('|');
+        if (!groups.has(k)) groups.set(k, []);
+        groups.get(k).push(c);
+      } else walk(c);
+    }
+  })(root);
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    const geo = mergeGeometries(list.map(m => m.geometry.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld))));
+    if (!geo) continue;
+    const m = new THREE.Mesh(geo, list[0].material);
+    m.castShadow = list[0].castShadow; m.receiveShadow = list[0].receiveShadow;
+    list.forEach(o => o.removeFromParent()); root.add(m);
+  }
+}
+
 /* =====================================================================
    ENVIRONMENT: sky, floor, loggia, lights, dust
    ===================================================================== */
@@ -355,7 +405,7 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(110, 48, 24), new THREE.Shad
     float n3(vec3 p){ vec3 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
       return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),
                  mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z); }
-    float fbm(vec3 p){ float a=.5, s=0.; for(int i=0;i<5;i++){ s+=a*n3(p); p*=2.03; a*=.5; } return s; }
+    float fbm(vec3 p){ float a=.5, s=0.; for(int i=0;i<4;i++){ s+=a*n3(p); p*=2.03; a*=.5; } return s; }
     void main(){
       vec3 d = normalize(vDir); float h = d.y;
       vec3 zen = vec3(.035,.06,.15), mid = vec3(.18,.26,.42), hor = vec3(.95,.62,.32);
@@ -389,7 +439,7 @@ function floorTexture() {
   g.strokeStyle = 'rgba(30,18,10,.55)'; g.lineWidth = 3;
   for (let i = 0; i <= n; i++) { g.beginPath(); g.moveTo(i * s, 0); g.lineTo(i * s, 1024); g.moveTo(0, i * s); g.lineTo(1024, i * s); g.stroke(); }
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(18, 18);
-  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); return t;
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t;
 }
 const floor = new THREE.Mesh(new THREE.CircleGeometry(48, 96),
   new THREE.MeshStandardMaterial({ map: floorTexture(), roughness: .38, envMapIntensity: .45 }));
@@ -418,13 +468,14 @@ floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
     THREE.MathUtils.degToRad(a0 + 90), THREE.MathUtils.degToRad(a1 - a0)), mat);
   band.material = mat.clone(); band.material.side = THREE.DoubleSide;
   band.position.y = 6.02 + 3.1 + .45; g.add(band);
+  mergeStatic(g);
   scene.add(g);
 })();
 
 const hemi = new THREE.HemisphereLight('#ffe7c4', '#3b281b', 1.7); scene.add(hemi);
 const key = new THREE.DirectionalLight('#ffdcae', 3.2);
 key.position.set(-7, 12, 7); key.target.position.set(0, 0, -3);
-key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+key.castShadow = true; key.shadow.mapSize.setScalar(QUALITY[qs.level].lite ? 1024 : 2048);
 Object.assign(key.shadow.camera, { left: -10, right: 10, top: 10, bottom: -10, near: 1, far: 40 });
 key.shadow.bias = -.0004; key.shadow.normalBias = .02;
 scene.add(key, key.target);
@@ -623,6 +674,7 @@ function buildFigure(look, seed) {
   // invisible hit volume
   const hit = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, 1.55, 10), new THREE.MeshBasicMaterial({ visible: false }));
   hit.position.y = 1.0; g.add(hit);
+  mergeStatic(g, o => o === headG || o === torso || o === hit); mergeStatic(headG);
   return { g, headG, torso, robe, hit };
 }
 
@@ -666,11 +718,11 @@ const LH = 44;
 class Painter {
   constructor() {
     this.cv = document.createElement('canvas');
-    this.cv.width = 2560; this.cv.height = 1440; this.S = this.cv.width / DW;
+    this.cv.width = 2048; this.cv.height = 1152; this.S = this.cv.width / DW;   // re-uploaded while drawing, so kept modest
     this.ctx = this.cv.getContext('2d');
     this.tex = new THREE.CanvasTexture(this.cv);
     this.tex.colorSpace = THREE.SRGBColorSpace;
-    this.tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    this.tex.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
     this.ops = []; this.i = 0; this.done = true; this.hits = [];
     this.pen = { x: DW * .9, y: DH * .1, lift: 1, color: INK };
     this.grain = this.makeGrain();
@@ -983,15 +1035,16 @@ const arcs = LINKS.map(l => {
 /* =====================================================================
    BUBBLE CURSOR — port of the Canvas UI Bubble, run as the final pass over the live 3D scene
    ===================================================================== */
-const BUB = { size: 30, trail: 24, follow: .5, blend: 14, speed: 2, refraction: 80, dispersion: 1, frost: 0, shine: .25, rim: .5,
+/* size = head radius in CSS px; trail = points sampled at 60 Hz (so 10 ≈ a 150 ms tail); blend = smoothing in CSS px */
+const BUB = { size: 28, trail: 10, follow: .9, blend: 5, speed: 2, refraction: 26, dispersion: 1, frost: 0, shine: .25, rim: .5,
   iridescence: 1, intensity: .9, tintStrength: 0, tint: [1, 1, 1], colorA: [.2902, .4549, .7216], colorB: [.4118, .4118, .4157] };
-const MAXT = 24;
+const MAXT = 10, TRAIL_HZ = 60;
 const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
   depthTest: false, depthWrite: false,
   uniforms: {
     uScene: { value: sceneRT.texture }, uResolution: { value: new THREE.Vector2(1, 1) }, uDpr: { value: 1 }, uTime: { value: 0 },
-    uPresence: { value: 0 }, uCount: { value: MAXT }, uTrail: { value: new Float32Array(MAXT * 2) }, uBaseRadius: { value: 0 },
-    uBlend: { value: BUB.blend }, uRefraction: { value: BUB.refraction }, uDispersion: { value: BUB.dispersion }, uFrost: { value: BUB.frost },
+    uPresence: { value: 0 }, uCount: { value: MAXT }, uTrail: { value: new Float32Array(MAXT * 3) }, uBox: { value: new THREE.Vector4() },
+    uSoft: { value: .01 }, uRefraction: { value: BUB.refraction }, uDispersion: { value: BUB.dispersion }, uFrost: { value: BUB.frost },
     uShine: { value: BUB.shine }, uRim: { value: BUB.rim }, uIridescence: { value: BUB.iridescence }, uIntensity: { value: BUB.intensity },
     uTint: { value: new THREE.Vector3(...BUB.tint) }, uTintStrength: { value: BUB.tintStrength },
     uColorA: { value: new THREE.Vector3(...BUB.colorA) }, uColorB: { value: new THREE.Vector3(...BUB.colorB) },
@@ -1002,10 +1055,9 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
     precision highp float;
     varying vec2 vUv;
     uniform sampler2D uScene; uniform vec2 uResolution; uniform float uDpr, uTime, uPresence;
-    uniform int uCount; uniform vec2 uTrail[${MAXT}]; uniform float uBaseRadius, uBlend, uRefraction, uDispersion, uFrost;
+    uniform int uCount; uniform vec3 uTrail[${MAXT}]; uniform vec4 uBox; uniform float uSoft, uRefraction, uDispersion, uFrost;
     uniform float uShine, uRim, uIridescence, uIntensity, uTintStrength; uniform vec3 uTint, uColorA, uColorB;
     uniform float uVignette, uGrain, uExposure, uFade;
-    const float EPS = 1e-4; const int ITR = 16;
 
     vec3 sceneAt(vec2 px, float blur){
       vec2 uv = clamp(px / uResolution, vec2(.0005), vec2(.9995));
@@ -1039,15 +1091,23 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
       float k7=-a000+a100+a010-a110+a001-a101-a011+a111;
       return k0+k1*u.x+k2*u.y+k3*u.z+k4*u.x*u.y+k5*u.y*u.z+k6*u.z*u.x+k7*u.x*u.y*u.z;
     }
-    float smoothMin(float d1, float d2, float k){ float h = exp(-k*d1) + exp(-k*d2); return -log(max(h, 1e-12))/k; }
-    float map(vec3 p){
-      float radius = uBaseRadius*float(uCount); float d = 1e5;
-      for (int i = 0; i < ${MAXT}; i++){ if (i >= uCount) break;
-        float s = length(p - vec3(uTrail[i], 0.)) - (radius - uBaseRadius*float(i)); d = smoothMin(d, s, uBlend); }
-      return d;
-    }
-    vec3 generateNormal(vec3 p){
-      return normalize(vec3(map(p+vec3(EPS,0,0))-map(p-vec3(EPS,0,0)), map(p+vec3(0,EPS,0))-map(p-vec3(0,EPS,0)), map(p+vec3(0,0,EPS))-map(p-vec3(0,0,EPS))));
+    /* the droplet is a tapered tube swept along the trail (xy = point, z = radius), smooth-unioned where it overlaps itself.
+       Returns the signed 2D distance D, plus the local tube radius R and the 2D gradient G — enough to rebuild the
+       surface height and normal analytically, so no raymarch is needed. */
+    float field(vec2 p, out float R, out vec2 G){
+      vec3 a = uTrail[0];
+      vec2 v0 = p - a.xy; float l0 = length(v0);
+      float D = l0 - a.z; R = a.z; G = v0/max(l0, 1e-6);
+      for (int i = 1; i < ${MAXT}; i++){ if (i >= uCount) break;
+        vec3 b = uTrail[i];
+        vec2 pa = p - a.xy, ba = b.xy - a.xy;
+        float h = clamp(dot(pa, ba)/max(dot(ba, ba), 1e-10), 0., 1.);
+        vec2 v = pa - ba*h; float l = length(v), r = mix(a.z, b.z, h), d = l - r;
+        float m = clamp(.5 + .5*(D - d)/uSoft, 0., 1.);
+        D = mix(D, d, m) - uSoft*m*(1. - m); R = mix(R, r, m); G = mix(G, v/max(l, 1e-6), m);
+        a = b;
+      }
+      return D;
     }
     vec3 dropletColor(vec3 n, vec3 rd){
       vec3 r = reflect(rd, n);
@@ -1056,17 +1116,15 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
     void main(){
       vec2 frag = gl_FragCoord.xy;
       vec3 outc = display(sceneAt(frag, 0.));
-      if (uPresence > .004) {
-        float minRes = min(uResolution.x, uResolution.y);
-        vec2 p = (frag*2. - uResolution)/minRes;
-        float radius = uBaseRadius*float(uCount), dmin = 1e5;
-        for (int i = 0; i < ${MAXT}; i++){ if (i >= uCount) break; dmin = min(dmin, length(p - uTrail[i]) - (radius - uBaseRadius*float(i))); }
-        if (dmin < .3) {
-          vec3 ray = vec3(p, 1.), rd = vec3(0, 0, -1.); float dist = 0.;
-          for (int i = 0; i < ITR; ++i){ dist = map(ray); ray += rd*dist; if (dist < EPS || dist > 8.) break; }
-          float cov = 1. - smoothstep(0., 3./minRes, dist);
-          if (cov > .001) {
-            vec3 n = generateNormal(ray);
+      float minRes = min(uResolution.x, uResolution.y);
+      vec2 p = (frag*2. - uResolution)/minRes;
+      if (uPresence > .004 && all(greaterThan(p, uBox.xy)) && all(lessThan(p, uBox.zw))) {
+        float R; vec2 G; float D = field(p, R, G);
+        float cov = clamp(.5 - D*minRes*.5, 0., 1.);   // ~1px anti-aliased rim
+        if (cov > .001) {
+            vec3 rd = vec3(0, 0, -1.);
+            float rho = max(D + R, 0.), z = sqrt(max(R*R - rho*rho, 0.));
+            vec3 n = normalize(vec3(G*rho, z + 1e-6));
             vec3 glints = pow(max(dropletColor(n, rd), 0.), vec3(7.));
             vec3 L = normalize(vec3(-.5, .7, .6));
             float spec = pow(max(dot(reflect(-L, n), vec3(0, 0, 1)), 0.), 60.);
@@ -1083,7 +1141,6 @@ const post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMater
             col += glints*uIridescence;
             col += vec3(spec*uShine*.9);
             outc = mix(outc, col, cov);
-          }
         }
       }
       vec2 q = (vUv - .5)*vec2(uResolution.x/uResolution.y, 1.);
@@ -1099,25 +1156,36 @@ const postScene = new THREE.Scene(); postScene.add(post);
 const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
 const trailX = new Float32Array(MAXT), trailY = new Float32Array(MAXT);
-const bub = { headX: innerWidth / 2, headY: innerHeight / 2, tx: innerWidth / 2, ty: innerHeight / 2, presence: 0, target: 0, has: false, time: 0 };
+const bub = { headX: innerWidth / 2, headY: innerHeight / 2, tx: innerWidth / 2, ty: innerHeight / 2, presence: 0, target: 0, has: false, time: 0, acc: 0 };
 trailX.fill(bub.headX); trailY.fill(bub.headY);
 function bubbleFrame(delta) {
   if (!REDUCED) bub.time += delta * BUB.speed;
   const follow = clamp(BUB.follow, .02, 1);
   const kHead = REDUCED || follow >= 1 ? 1 : 1 - Math.exp(-delta * (3 + follow * 30));
   const kScale = REDUCED ? 1 : 1 - Math.exp(-delta * 10);
+  const px = bub.headX, py = bub.headY;
   bub.headX += (bub.tx - bub.headX) * kHead; bub.headY += (bub.ty - bub.headY) * kHead;
-  for (let i = MAXT - 1; i > 0; i--) { trailX[i] = trailX[i - 1]; trailY[i] = trailY[i - 1]; }
+  /* the tail is sampled on a fixed 60 Hz clock, so it keeps the same length at 30 fps or 144 fps */
+  bub.acc += delta;
+  const steps = Math.min(MAXT, Math.floor(bub.acc * TRAIL_HZ)); bub.acc -= steps / TRAIL_HZ;
+  for (let s = 1; s <= steps; s++) {
+    for (let i = MAXT - 1; i > 0; i--) { trailX[i] = trailX[i - 1]; trailY[i] = trailY[i - 1]; }
+    trailX[0] = lerp(px, bub.headX, s / steps); trailY[0] = lerp(py, bub.headY, s / steps);
+  }
   trailX[0] = bub.headX; trailY[0] = bub.headY;
   bub.presence += (bub.target - bub.presence) * kScale;
-  const u = post.material.uniforms, W = sceneRT.width, H = sceneRT.height, dpr = W / Math.max(canvas.clientWidth, 1);
-  const count = clamp(Math.round(BUB.trail), 1, MAXT), minRes = Math.min(W, H);
-  const headRadius = Math.max(BUB.size, 4) * dpr * bub.presence;
+  const u = post.material.uniforms, T3 = u.uTrail.value, W = sceneRT.width, H = sceneRT.height, dpr = W / Math.max(canvas.clientWidth, 1);
+  const count = clamp(Math.round(BUB.trail), 1, MAXT), minRes = Math.min(W, H), toN = 2 / minRes;
+  const r0 = Math.max(BUB.size, 4) * dpr * bub.presence * toN;   // head radius, normalised units
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   for (let i = 0; i < count; i++) {
-    const dx = trailX[i] * dpr, dy = H - trailY[i] * dpr;
-    u.uTrail.value[i * 2] = (dx * 2 - W) / minRes; u.uTrail.value[i * 2 + 1] = (dy * 2 - H) / minRes;
+    const x = (trailX[i] * dpr * 2 - W) / minRes, y = ((H - trailY[i] * dpr) * 2 - H) / minRes, r = r0 * (1 - i / count);
+    T3[i * 3] = x; T3[i * 3 + 1] = y; T3[i * 3 + 2] = r;
+    x0 = Math.min(x0, x - r); y0 = Math.min(y0, y - r); x1 = Math.max(x1, x + r); y1 = Math.max(y1, y + r);
   }
-  u.uCount.value = count; u.uBaseRadius.value = (headRadius * 2) / (minRes * count);
+  const soft = Math.max(BUB.blend, .5) * dpr * toN, pad = soft + 3 * toN;
+  u.uBox.value.set(x0 - pad, y0 - pad, x1 + pad, y1 + pad); u.uSoft.value = soft;
+  u.uCount.value = count;
   u.uResolution.value.set(W, H); u.uDpr.value = dpr; u.uTime.value = bub.time; u.uPresence.value = bub.presence;
 }
 
@@ -1322,17 +1390,44 @@ function pick() {
    RESIZE + LOOP
    ===================================================================== */
 function resize() {
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const q = QUALITY[qs.level];
+  renderer.setPixelRatio(Math.max(.5, DPR * q.scale));
   renderer.setSize(innerWidth, innerHeight, false);
-  renderer.getDrawingBufferSize(bufSize); sceneRT.setSize(bufSize.x, bufSize.y);
+  renderer.getDrawingBufferSize(bufSize);
+  const msaa = Q.has('nomsaa') ? 0 : q.msaa;
+  if (sceneRT.samples !== msaa) { sceneRT.samples = msaa; sceneRT.dispose(); }
+  sceneRT.setSize(bufSize.x, bufSize.y);
   cam.aspect = aspect(); cam.updateProjectionMatrix();
+  if (LITE !== q.lite) {
+    LITE = q.lite; document.documentElement.classList.toggle('lite', LITE);
+    key.shadow.mapSize.setScalar(LITE ? 1024 : 2048); key.shadow.map?.dispose(); key.shadow.map = null;
+  }
 }
 addEventListener('resize', resize);
 
-const tmp = new V3(), plane = new THREE.Plane(UP, -1.5), hitP = new V3();
-let last = performance.now(), T = 0;
+/* step quality down after two slow ~1 s windows (or one very slow one); step back up only toward the
+   starting guess, never to a level that already proved too slow. */
+function adaptQuality(ms) {
+  if (Q_PIN != null || document.hidden || ms > 250) return;
+  if (qs.warm > 0) { qs.warm -= ms / 1000; return; }
+  qs.acc += ms; qs.n++;
+  if (qs.acc < 1000) return;
+  const avg = qs.acc / qs.n; qs.acc = qs.n = 0;
+  qs.slow = avg > 22 ? qs.slow + (avg > 40 ? 2 : 1) : 0;
+  qs.fast = avg < 17.5 ? qs.fast + 1 : 0;
+  if (qs.slow >= 2 && qs.level < QUALITY.length - 1) { qs.best = Math.max(qs.best, qs.level + 1); qs.level++; }
+  else if (qs.fast >= 4 && qs.level > qs.best) qs.level--;
+  else return;
+  qs.slow = qs.fast = 0; qs.warm = 1.5; resize();
+}
+resize();
+
+const css = (el, prop, v) => { const c = el._css ??= {}; if (c[prop] !== v) { c[prop] = v; el.style[prop] = v; } };   // skip no-op style writes
+const tmp = new V3(), tmpV = new V3(), plane = new THREE.Plane(UP, -1.5), hitP = new V3(), penCol = new THREE.Color();
+let last = performance.now(), T = 0, frameNo = 0, paperDirty = false;
 function frame(now, sim) {
-  const dt = sim ? .1 : Math.min((now - last) / 1000, 1 / 20); last = now; T += dt;
+  if (!sim) adaptQuality(now - last);
+  const dt = sim ? .1 : Math.min((now - last) / 1000, 1 / 20); last = now; T += dt; frameNo++;
   updateCamera(dt);
   if (pointerDirty || (T * 10 | 0) % 3 === 0) pick();
 
@@ -1343,8 +1438,11 @@ function frame(now, sim) {
     const targetA = focused && s.st !== focusId ? 0 : 1;
     s.alpha += (targetA - s.alpha) * (1 - Math.exp(-dt * 5));
     s.g.visible = s.alpha > .02;
-    s.g.traverse(o => { if (o.isMesh && o.material.visible !== false) { const ms = Array.isArray(o.material) ? o.material : [o.material];
-      ms.forEach(m => { const tr = s.alpha < .995; if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; } m.opacity = s.alpha; m.depthWrite = s.alpha > .5; }); } });
+    if (!s.mats) { const set = new Set(); s.g.traverse(o => { if (o.isMesh && o.material.visible !== false) [].concat(o.material).forEach(m => set.add(m)); }); s.mats = [...set]; s.aSet = -1; }
+    if (Math.abs(s.alpha - s.aSet) > 5e-4) {   // only touch materials while fading
+      s.aSet = s.alpha; const tr = s.alpha < .995;
+      for (const m of s.mats) { if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; } m.opacity = s.alpha; m.depthWrite = s.alpha > .5; }
+    }
     const hov = (hoverStation === s.st && mode !== 'focus') || (mode === 'links' && hotLink && (LINKS[hotLink - 1].a === s.st || LINKS[hotLink - 1].b === s.st));
     s.hover += ((hov ? 1 : 0) - s.hover) * (1 - Math.exp(-dt * 8));
     s.robe.emissive.set(ST[s.st].color).multiplyScalar(s.hover * .35);
@@ -1352,20 +1450,25 @@ function frame(now, sim) {
     let ty = 0, tp = 0;
     s.headG.getWorldPosition(tmp); tmp.y += .15;
     const look = focused && s.st === focusId ? cam.position : (gotP ? hitP : null);
-    if (look) { const v = look.clone().sub(tmp); ty = Math.atan2(v.x, v.z) - s.yaw; ty = Math.atan2(Math.sin(ty), Math.cos(ty));
+    if (look) { const v = tmpV.copy(look).sub(tmp); ty = Math.atan2(v.x, v.z) - s.yaw; ty = Math.atan2(Math.sin(ty), Math.cos(ty));
       ty = clamp(ty, -.75, .75); tp = clamp(-Math.atan2(v.y, Math.hypot(v.x, v.z)), -.35, .3); }
     if (focused && s.st === focusId && !painter.done) { ty = -.45 + Math.sin(T * .8) * .05; tp = .05; }
     s.hy += (ty - s.hy) * (1 - Math.exp(-dt * 4)); s.hp += (tp - s.hp) * (1 - Math.exp(-dt * 4));
     s.headG.rotation.set(s.hp, s.hy, Math.sin(T * .7 + s.i) * .03);
     s.torso.scale.y = 1 + Math.sin(T * 1.7 + s.i * 1.3) * .006;
-    s.g.traverse(o => { if (o.userData.spin) o.rotation.y += dt * .8; });
+    if (!s.spin) { s.spin = []; s.g.traverse(o => { if (o.userData.spin) s.spin.push(o); }); }
+    for (const o of s.spin) o.rotation.y += dt * .8;
   }
   /* decor fades during focus */
   const decorA = mode === 'focus' || mode === 'switching' ? 0 : 1;
   for (const d of decor) {
     d.a = (d.a ?? 1) + (decorA - (d.a ?? 1)) * (1 - Math.exp(-dt * 5));
     d.g.visible = d.a > .02;
-    d.g.traverse(o => { if (o.material) { if (!o.isSprite && !o.material.transparent && d.a < .995) { o.material.transparent = true; o.material.needsUpdate = true; } o.material.opacity = (o.isSprite ? .8 : 1) * d.a; } });
+    if (!d.objs) { d.objs = []; d.g.traverse(o => { if (o.material) d.objs.push(o); }); d.aSet = -1; }
+    if (Math.abs(d.a - d.aSet) > 5e-4) {
+      d.aSet = d.a;
+      for (const o of d.objs) { if (!o.isSprite && !o.material.transparent && d.a < .995) { o.material.transparent = true; o.material.needsUpdate = true; } o.material.opacity = (o.isSprite ? .8 : 1) * d.a; }
+    }
     if (d.light) { const f = .82 + .18 * Math.sin(T * 9 + d.seed) * Math.sin(T * 13.7 + d.seed * 2); d.light.intensity = d.base * f * d.a; d.flame.scale.set(1, 2 + f * .4, 1); d.glow.scale.setScalar(.38 + f * .08); }
   }
   dust.rotation.y = Math.sin(T * .05) * .1; dust.position.y = Math.sin(T * .3) * .1;
@@ -1379,14 +1482,16 @@ function frame(now, sim) {
     if (bs.unroll === bs.target) { bs.rollSpeed = 1.25; if (bs.onRolled) { const f = bs.onRolled; bs.onRolled = null; f(); } }
   }
   if (board.visible) {
-    if (mode === 'focus' && !painter.done && bs.unroll >= 1) { if (painter.step(dt)) painter.tex.needsUpdate = true; if (painter.done) syncUI(); }
+    if (mode === 'focus' && !painter.done && bs.unroll >= 1) { if (painter.step(dt)) paperDirty = true; if (painter.done) syncUI(); }
+    /* re-uploading the paper is the costly part of sketching; the lite tier does it at half rate */
+    if (paperDirty && (painter.done || !LITE || frameNo % 2 === 0)) { painter.tex.needsUpdate = true; paperDirty = false; }
     const pen = painter.pen;
     const restX = DW * .955, restY = DH * .06;
     const tx = painter.done ? restX : pen.x, ty = painter.done ? restY : pen.y, tl = painter.done ? .9 + Math.sin(T * 1.4) * .15 : pen.lift;
     const p = designToRoll(tx, ty, .012 + tl * .14);
     if (painter.done) bs.penP.lerp(p, 1 - Math.exp(-dt * 3)); else bs.penP.copy(p);
     pencil.position.copy(bs.penP);
-    pencil.userData.body.material.color.lerp(new THREE.Color(pen.color === INK || pen.color === EDGE || pen.color === MUTED ? '#c99a3a' : pen.color), .15);
+    pencil.userData.body.material.color.lerp(penCol.set(pen.color === INK || pen.color === EDGE || pen.color === MUTED ? '#c99a3a' : pen.color.replace(/^rgba\((.*),[^,]*\)$/, 'rgb($1)')), .15);
     pencil.visible = bs.unroll > .98;
     const hh = bs.unroll > .99 && painter.done ? hoverHit : null;
     if (hh) { const [x, y, w, h] = hh.rect; hl.position.copy(designToRoll(x + w / 2, y + h / 2, .004)); hl.scale.set(w / DW * BOARD_W, h / DH * BOARD_H, 1); hl.material.color.set(hh.color); }
@@ -1410,15 +1515,18 @@ function frame(now, sim) {
   for (const s of Object.values(STN)) {
     tmp.copy(s.anchor).setY(2.12).project(cam);
     const show = (mode === 'overview' || mode === 'links') && camT > .6 && tmp.z < 1;
-    s.tag.style.opacity = show ? 1 : 0;
-    s.tag.style.transform = `translate(${(tmp.x * .5 + .5) * W}px, ${(-tmp.y * .5 + .5) * H}px) translate(-50%, -100%)`;
+    css(s.tag, 'opacity', show ? '1' : '0');
+    if (show) s.seenT = T;
+    if (T - (s.seenT ?? -9) < .6)   // keep tracking through the fade-out, then stop writing styles
+      css(s.tag, 'transform', `translate(${((tmp.x * .5 + .5) * W).toFixed(1)}px, ${((-tmp.y * .5 + .5) * H).toFixed(1)}px) translate(-50%, -100%)`);
     s.tag.classList.toggle('hot', hoverStation === s.id);
   }
   for (const a of arcs) {
-    tmp.copy(a.mid).project(cam);
-    a.badge.style.opacity = mode === 'links' && a.grow > .6 ? '' : 0;
-    a.badge.style.pointerEvents = mode === 'links' ? 'auto' : 'none';
-    a.badge.style.left = `${(tmp.x * .5 + .5) * W}px`; a.badge.style.top = `${(-tmp.y * .5 + .5) * H}px`;
+    const on = mode === 'links';
+    css(a.badge, 'opacity', on && a.grow > .6 ? '' : '0');
+    css(a.badge, 'pointerEvents', on ? 'auto' : 'none');
+    if (on) a.seenT = T;
+    if (T - (a.seenT ?? -9) < .6) { tmp.copy(a.mid).project(cam); css(a.badge, 'translate', `${((tmp.x * .5 + .5) * W).toFixed(1)}px ${((-tmp.y * .5 + .5) * H).toFixed(1)}px`); }
   }
 
   /* sky + light respond to the cursor */
@@ -1430,6 +1538,7 @@ function frame(now, sim) {
 
   bubbleFrame(Math.min(dt, 1 / 30));
   if (sim) return;
+  renderer.shadowMap.needsUpdate = !LITE || frameNo % 2 === 0;   // shadows move slowly; half rate is invisible
   if (Q.has('nopost')) { renderer.setRenderTarget(null); renderer.render(scene, cam); } else {
   renderer.setRenderTarget(sceneRT); renderer.render(scene, cam);
   renderer.setRenderTarget(null); renderer.render(postScene, postCam); }
